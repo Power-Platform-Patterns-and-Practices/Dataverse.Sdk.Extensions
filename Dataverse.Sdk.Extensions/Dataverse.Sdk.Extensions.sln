@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31019.35
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Dataverse.Sdk.Extensions", "Dataverse.Sdk.Extensions\Dataverse.Sdk.Extensions.shproj", "{B80203FC-9038-4596-9484-1031F2912BDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataverse.Sdk.Extensions.Samples", "Dataverse.Sdk.Extensions.Samples\Dataverse.Sdk.Extensions.Samples.csproj", "{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Dataverse.Sdk.Extensions\Dataverse.Sdk.Extensions.projitems*{67dfd80e-fb87-431d-a48d-d3c73cabdfa1}*SharedItemsImports = 4
+		Dataverse.Sdk.Extensions\Dataverse.Sdk.Extensions.projitems*{b80203fc-9038-4596-9484-1031f2912bdf}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8173C9ED-EE77-4DA1-9692-90D88C461771}
+	EndGlobalSection
+EndGlobal
