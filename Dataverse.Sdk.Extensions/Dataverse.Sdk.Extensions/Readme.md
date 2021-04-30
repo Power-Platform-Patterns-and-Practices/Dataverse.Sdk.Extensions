@@ -8,6 +8,7 @@ List of extensions class and methods
     -  CreateFromInitialization : Creates a table row from another table row using standard columns mapping
     -  Delete : Deletes a row by its reference
     -  Delete : Deletes a row directly
+    -  Delete : Deletes a row using its alternate key(s)
     -  GetCurrentUserRoles : Gets the list of current user affected roles
     -  GetEnvironmentVariable : Retrieves an Environment variable value
     -  GetEnvironmentVariables : Retrieves multiple Environment variables values
