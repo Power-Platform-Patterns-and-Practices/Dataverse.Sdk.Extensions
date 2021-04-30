@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataverse.Sdk.Extensions.Sa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataverse.Sdk.Extensions.Tests", "Dataverse.Sdk.Extensions.Tests\Dataverse.Sdk.Extensions.Tests.csproj", "{6B5D2F34-E85C-4CBB-AF53-4E2C12A7D1B9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D6230D62-D625-49D9-A9C5-A47968F461CE}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet Package\Dataverse.Sdk.Extensions.nuspec = NuGet Package\Dataverse.Sdk.Extensions.nuspec
+		NuGet Package\Dataverse.Sdk.Extensions.targets = NuGet Package\Dataverse.Sdk.Extensions.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Dataverse.Sdk.Extensions\Dataverse.Sdk.Extensions.projitems*{67dfd80e-fb87-431d-a48d-d3c73cabdfa1}*SharedItemsImports = 4
