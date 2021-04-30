@@ -7,9 +7,12 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Dataverse.Sdk.Extensions", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataverse.Sdk.Extensions.Samples", "Dataverse.Sdk.Extensions.Samples\Dataverse.Sdk.Extensions.Samples.csproj", "{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataverse.Sdk.Extensions.Tests", "Dataverse.Sdk.Extensions.Tests\Dataverse.Sdk.Extensions.Tests.csproj", "{6B5D2F34-E85C-4CBB-AF53-4E2C12A7D1B9}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Dataverse.Sdk.Extensions\Dataverse.Sdk.Extensions.projitems*{67dfd80e-fb87-431d-a48d-d3c73cabdfa1}*SharedItemsImports = 4
+		Dataverse.Sdk.Extensions\Dataverse.Sdk.Extensions.projitems*{6b5d2f34-e85c-4cbb-af53-4e2c12a7d1b9}*SharedItemsImports = 4
 		Dataverse.Sdk.Extensions\Dataverse.Sdk.Extensions.projitems*{b80203fc-9038-4596-9484-1031f2912bdf}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +24,10 @@ Global
 		{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67DFD80E-FB87-431D-A48D-D3C73CABDFA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B5D2F34-E85C-4CBB-AF53-4E2C12A7D1B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B5D2F34-E85C-4CBB-AF53-4E2C12A7D1B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B5D2F34-E85C-4CBB-AF53-4E2C12A7D1B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B5D2F34-E85C-4CBB-AF53-4E2C12A7D1B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
