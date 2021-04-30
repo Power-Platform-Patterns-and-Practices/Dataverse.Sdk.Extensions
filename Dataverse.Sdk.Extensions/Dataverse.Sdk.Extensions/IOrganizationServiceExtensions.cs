@@ -86,6 +86,56 @@ namespace Dataverse.Sdk.Extensions
         }
 
         /// <summary>
+        /// Delete a row by its alternate key
+        /// </summary>
+        /// <typeparam name="T">Type of the table row to delete</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="keyName">alternate key name</param>
+        /// <param name="keyValue">alternate key value</param>
+        public static void Delete<T>(this IOrganizationService service, string keyName, object keyValue) where T : Entity
+        {
+            string entityName = typeof(T).GetField("EntityLogicalName").GetRawConstantValue().ToString();
+
+            service.Delete(entityName, keyName, keyValue);
+        }
+
+        /// <summary>
+        /// Delete a row by its alternate key
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="entityLogicalname">row to delete</param>
+        /// <param name="keys">Alternate keys collection</param>
+        public static void Delete(this IOrganizationService service, string entityLogicalname, KeyAttributeCollection keys)
+        {
+            service.Delete(new EntityReference(entityLogicalname, keys));
+        }
+
+        /// <summary>
+        /// Delete a row by its alternate key
+        /// </summary>
+        /// <typeparam name="T">Type of the table row to delete</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="keys">Alternate keys collection</param>
+        public static void Delete<T>(this IOrganizationService service, KeyAttributeCollection keys) where T : Entity
+        {
+            string entityName = typeof(T).GetField("EntityLogicalName").GetRawConstantValue().ToString();
+
+            service.Delete(entityName, keys);
+        }
+
+        /// <summary>
+        /// Delete a row by its alternate key
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="entityLogicalname">Logical name of the table row to delete</param>
+        /// <param name="keyName">alternate key name</param>
+        /// <param name="keyValue">alternate key value</param>
+        public static void Delete(this IOrganizationService service, string entityLogicalname, string keyName, object keyValue)
+        {
+            service.Delete(new EntityReference(entityLogicalname, keyName, keyValue));
+        }
+
+        /// <summary>
         /// Gets the list of current user affected roles
         /// </summary>
         /// <param name="service">Dataverse Organization service</param>

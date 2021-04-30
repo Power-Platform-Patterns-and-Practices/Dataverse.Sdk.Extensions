@@ -31,6 +31,52 @@ namespace Dataverse.Sdk.Extensions.Samples
         }
 
         /// <summary>
+        /// This sample demonstrates how to delete a row using its alternate key
+        /// </summary>
+        /// <remarks>
+        /// This sample deletes an account that has an alternate key made of
+        /// column "accountnumber". The account number of the account to delete
+        /// is ABCDEFGH
+        /// </remarks>
+        /// <param name="service">Dataverse Organization service</param>
+        public void DeleteFromAlternateKey(IOrganizationService service)
+        {
+            service.Delete<Account>("accountnumber", "ABCDEFGH");
+
+            // or
+
+            service.Delete("account", "accountnumber", "ABCDEFGH");
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to delete a row using its alternate key
+        /// </summary>
+        /// <remarks>
+        /// This sample deletes an account that has an alternate key made of
+        /// column "accountnumber" and "address1_country". The account number
+        /// of the account to delete is ABCDEFGH and the country is France
+        /// </remarks>
+        /// <param name="service">Dataverse Organization service</param>
+        public void DeleteFromAlternateKeyCollection(IOrganizationService service)
+        {
+            service.Delete<Account>(new KeyAttributeCollection
+                {
+                    {"accountnumber","ABCDEFGH" },
+                    {"address1_country","France" }
+                }
+            );
+
+            // or
+
+            service.Delete("account", new KeyAttributeCollection
+                {
+                    {"accountnumber","ABCDEFGH" },
+                    {"address1_country","France" }
+                }
+            );
+        }
+
+        /// <summary>
         /// This sample demonstrates how to delete a row
         /// </summary>
         /// <remarks>
