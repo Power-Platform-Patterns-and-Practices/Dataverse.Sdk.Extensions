@@ -72,7 +72,7 @@ namespace Dataverse.Sdk.Extensions
         /// <param name="reference">Reference of the row to delete</param>
         public static void Delete(this IOrganizationService service, EntityReference reference)
         {
-            service.Delete(reference.LogicalName, reference.Id);
+            service.Execute(new DeleteRequest() { Target = reference });
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Dataverse.Sdk.Extensions
         /// <param name="record">row to delete</param>
         public static void Delete(this IOrganizationService service, Entity row)
         {
-            service.Delete(row.LogicalName, row.Id);
+            service.Execute(new DeleteRequest() { Target = row.ToEntityReference() });
         }
 
         /// <summary>
