@@ -11,6 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataverse.Sdk.Extensions.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D6230D62-D625-49D9-A9C5-A47968F461CE}"
 	ProjectSection(SolutionItems) = preProject
+		Coverage.bat = Coverage.bat
 		NuGet Package\Dataverse.Sdk.Extensions.nuspec = NuGet Package\Dataverse.Sdk.Extensions.nuspec
 		NuGet Package\Dataverse.Sdk.Extensions.targets = NuGet Package\Dataverse.Sdk.Extensions.targets
 	EndProjectSection

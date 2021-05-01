@@ -127,8 +127,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EarlyBoundEntities\Account.cs" />
     <Compile Include="EntityTests.cs" />
+    <Compile Include="FakeMessageExecutors\RetrieveMetadataChangesRequestExecutor.cs" />
+    <Compile Include="IOrganizationServiceTests.cs" />
+    <Compile Include="MetadataModels\AccountMetadata.cs" />
+    <Compile Include="MetadataModels\GlobalMetadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SystemTypesTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -143,6 +149,7 @@
       <Name>Dataverse.Sdk.Extensions.ForCoverage</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
