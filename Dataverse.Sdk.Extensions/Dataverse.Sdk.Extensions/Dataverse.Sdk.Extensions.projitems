@@ -10,7 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)EntityExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EntityReferenceExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IOrganizationServiceExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SystemTypesExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToStringDebugExtensions.cs" />
   </ItemGroup>
 </Project>
