@@ -130,6 +130,9 @@
     <Compile Include="EarlyBoundEntities\Account.cs" />
     <Compile Include="EarlyBoundEntities\AttributeMap.cs" />
     <Compile Include="EarlyBoundEntities\EntityMap.cs" />
+    <Compile Include="EarlyBoundEntities\Contact.cs" />
+    <Compile Include="EarlyBoundEntities\Lead.cs" />
+    <Compile Include="EntityReferenceTests.cs" />
     <Compile Include="EntityTests.cs" />
     <Compile Include="FakeMessageExecutors\RetrieveMetadataChangesRequestExecutor.cs" />
     <Compile Include="FakeXrmEasyTestsBase.cs" />
@@ -138,6 +141,7 @@
     <Compile Include="MetadataModels\GlobalMetadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemTypesTests.cs" />
+    <Compile Include="ToStringDebugTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
