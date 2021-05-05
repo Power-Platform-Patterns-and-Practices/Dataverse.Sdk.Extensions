@@ -130,6 +130,7 @@
     <Compile Include="EarlyBoundEntities\Account.cs" />
     <Compile Include="EntityTests.cs" />
     <Compile Include="FakeMessageExecutors\RetrieveMetadataChangesRequestExecutor.cs" />
+    <Compile Include="FakeXrmEasyTestsBase.cs" />
     <Compile Include="IOrganizationServiceTests.cs" />
     <Compile Include="MetadataModels\AccountMetadata.cs" />
     <Compile Include="MetadataModels\GlobalMetadata.cs" />
