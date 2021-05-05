@@ -2,9 +2,11 @@
 using Dataverse.Sdk.Extensions.Tests.MetadataModels;
 using FakeXrmEasy;
 using FakeXrmEasy.Extensions;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -13,6 +15,117 @@ namespace Dataverse.Sdk.Extensions.Tests
 
     public class IOrganizationServiceTests : FakeXrmEasyTestsBase
     {
+        [Fact]
+        public void CreateFromInitialization_Creates_Another_Row_Using_Standard_Columns()
+        {
+            //Arrange
+            var current = new Entity("account")
+            {
+                Id = Guid.NewGuid(),
+                ["name"] = "Your Company",
+                ["description"] = "Will not be used"
+            };
+            var entityMap = new Entity("entitymap")
+            {
+                Id = Guid.NewGuid(),
+                ["sourceentityname"] = "account",
+                ["targetentityname"] = "account"
+            };
+            var attributeMap = new Entity("attributemap")
+            {
+                Id = Guid.NewGuid(),
+                ["entitymapid"] = entityMap.ToEntityReference(),
+                ["sourceattributename"] = "name",
+                ["targetattributename"] = "name"
+            };
+            _context.Initialize(new Entity[] { current, entityMap, attributeMap });
+
+            //Act
+            var created = _service.CreateFromInitialization("account", current.ToEntityReference(), TargetFieldType.All);
+
+            //Assert
+            Assert.NotEqual(current.Id, created.Id);
+            Assert.Equal(current.GetAttributeValue<string>("name"), created.GetAttributeValue<string>("name"));
+            Assert.Null(created.GetAttributeValue<string>("description"));
+        }
+
+        [Fact]
+        public void CreateFromInitialization_Creates_Another_Row_Using_Additional_Columns()
+        {
+            //Arrange
+            var current = new Entity("account")
+            {
+                Id = Guid.NewGuid(),
+                ["name"] = "Your Company",
+                ["description"] = "Will not be used"
+            };
+            var entityMap = new Entity("entitymap")
+            {
+                Id = Guid.NewGuid(),
+                ["sourceentityname"] = "account",
+                ["targetentityname"] = "account"
+            };
+            var attributeMap = new Entity("attributemap")
+            {
+                Id = Guid.NewGuid(),
+                ["entitymapid"] = entityMap.ToEntityReference(),
+                ["sourceattributename"] = "name",
+                ["targetattributename"] = "name"
+            };
+            _context.Initialize(new Entity[] { current, entityMap, attributeMap });
+
+            //Act
+            var created = _service.CreateFromInitialization(
+                                "account",
+                                current.ToEntityReference(),
+                                TargetFieldType.All,
+                                new Dictionary<string, object> { { "description", "New Description" } }
+                            );
+
+            //Assert
+            Assert.NotEqual(current.Id, created.Id);
+            Assert.Equal(current.GetAttributeValue<string>("name"), created.GetAttributeValue<string>("name"));
+            Assert.Equal("New Description", created.GetAttributeValue<string>("description"));
+        }
+
+        [Fact]
+        public void CreateFromInitialization_Creates_Another_Earlybound_Row_Using_Additional_Columns()
+        {
+            //Arrange
+            var current = new Account()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Your Company",
+                Description = "Will not be used"
+            };
+            var entityMap = new EntityMap()
+            {
+                Id = Guid.NewGuid(),
+                SourceEntityName = "account",
+                TargetEntityName = "account"
+            };
+            var attributeMap = new AttributeMap()
+            {
+                Id = Guid.NewGuid(),
+                EntityMapId = entityMap.ToEntityReference(),
+                SourceAttributeName = "name",
+                TargetAttributeName = "name"
+            };
+            _context.Initialize(new Entity[] { current, entityMap, attributeMap });
+
+            //Act
+            var created = _service.CreateFromInitialization<Account>(
+                                current.ToEntityReference(),
+                                TargetFieldType.All,
+                                new Dictionary<string, object> { { "description", "New Description" } }
+                            );
+
+            //Assert
+            Assert.NotEqual(current.Id, created.Id);
+            Assert.Equal(current.Name, created.Name);
+            Assert.Equal("New Description", created.Description);
+        }
+
         [Fact]
         public void Delete_Can_Delete_Record_By_EntityReference()
         {
@@ -348,7 +461,7 @@ namespace Dataverse.Sdk.Extensions.Tests
         public void GetEnvironmentVariables_Throws_If_No_Variables_Are_Found()
         {
             //Arrange
-            
+
             //Act
             var exception = Record.Exception(() => _service.GetEnvironmentVariables("environmentVariable1", "environmentVariable2"));
 

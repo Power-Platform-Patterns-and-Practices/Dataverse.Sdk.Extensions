@@ -128,6 +128,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarlyBoundEntities\Account.cs" />
+    <Compile Include="EarlyBoundEntities\AttributeMap.cs" />
+    <Compile Include="EarlyBoundEntities\EntityMap.cs" />
     <Compile Include="EntityTests.cs" />
     <Compile Include="FakeMessageExecutors\RetrieveMetadataChangesRequestExecutor.cs" />
     <Compile Include="FakeXrmEasyTestsBase.cs" />
