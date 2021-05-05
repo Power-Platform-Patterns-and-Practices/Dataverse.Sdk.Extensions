@@ -1,6 +1,5 @@
 ﻿using Dataverse.Sdk.Extensions.Tests.FakeMessageExecutors;
 using Dataverse.Sdk.Extensions.Tests.MetadataModels;
-using FakeXrmEasy;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -11,13 +10,12 @@ using Xunit;
 
 namespace Dataverse.Sdk.Extensions.Tests
 {
-    public class EntityTests
+    public class EntityTests : FakeXrmEasyTestsBase
     {
         [Fact]
         public void GetAliasedValue_Can_Read_Aliased_Value_From_Record()
         {
             // Arrange
-            var fakedContext = new XrmFakedContext();
             var contact = new Entity("contact")
             {
                 Id = Guid.NewGuid(),
@@ -29,7 +27,7 @@ namespace Dataverse.Sdk.Extensions.Tests
                 ["primarycontactid"] = contact.ToEntityReference(),
                 ["name"] = "Your Company"
             };
-            fakedContext.Initialize(new Entity[] { contact, account });
+            _context.Initialize(new Entity[] { contact, account });
 
             //Act
             var query = new QueryExpression("account")
@@ -50,7 +48,7 @@ namespace Dataverse.Sdk.Extensions.Tests
                 }
             };
 
-            Entity record = fakedContext.GetOrganizationService().RetrieveMultiple(query).Entities.FirstOrDefault();
+            Entity record = _service.RetrieveMultiple(query).Entities.FirstOrDefault();
             string fullname = record.GetAliasedValue<string>("primarycontact", "fullname");
 
             //Assert 
@@ -61,7 +59,6 @@ namespace Dataverse.Sdk.Extensions.Tests
         public void GetAliasedValue_Throws_If_Wrong_Aliased_Type()
         {
             // Arrange
-            var fakedContext = new XrmFakedContext();
             var contact = new Entity("contact")
             {
                 Id = Guid.NewGuid(),
@@ -73,7 +70,7 @@ namespace Dataverse.Sdk.Extensions.Tests
                 ["primarycontactid"] = contact.ToEntityReference(),
                 ["name"] = "Your Company"
             };
-            fakedContext.Initialize(new Entity[] { contact, account });
+            _context.Initialize(new Entity[] { contact, account });
 
             //Act
             var query = new QueryExpression("account")
@@ -94,7 +91,7 @@ namespace Dataverse.Sdk.Extensions.Tests
                 }
             };
 
-            Entity record = fakedContext.GetOrganizationService().RetrieveMultiple(query).Entities.FirstOrDefault();
+            Entity record = _service.RetrieveMultiple(query).Entities.FirstOrDefault();
             var exception = Record.Exception(() => record.GetAliasedValue<DateTime>("primarycontact", "fullname"));
 
             //Assert 
@@ -117,12 +114,11 @@ namespace Dataverse.Sdk.Extensions.Tests
         [Fact]
         public void Clone_default_addCloneLabel_Adds_Clone_Label()
         {
-            var fakedContext = new XrmFakedContext();
             var metadata = AccountMetadata.GetEntityMetadata();
             var entityMetadata = new EntityMetadataCollection() { metadata };
-            fakedContext.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
+            _context.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
 
-            var clone = new Entity("account") { ["name"] = "Your Company" }.Clone(fakedContext.GetOrganizationService());
+            var clone = new Entity("account") { ["name"] = "Your Company" }.Clone(_service);
 
             Assert.Equal("Your Company (clone)", clone.GetAttributeValue<string>("name"));
         }
@@ -130,12 +126,14 @@ namespace Dataverse.Sdk.Extensions.Tests
         [Fact]
         public void Clone_addCloneLabel_false_Ignores_Clone_Label()
         {
-            var fakedContext = new XrmFakedContext();
             var metadata = AccountMetadata.GetEntityMetadata();
             var entityMetadata = new EntityMetadataCollection() { metadata };
-            fakedContext.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
+            _context.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
 
-            var clone = new Entity("account") { ["name"] = "Your Company" }.Clone(fakedContext.GetOrganizationService(), false);
+            var clone = new Entity("account")
+            {
+                ["name"] = "Your Company"
+            }.Clone(_service, false);
 
             Assert.Equal("Your Company", clone.GetAttributeValue<string>("name"));
         }
@@ -143,12 +141,15 @@ namespace Dataverse.Sdk.Extensions.Tests
         [Fact]
         public void Clone_columnsToRemove_Ignores_Specified_Columns()
         {
-            var fakedContext = new XrmFakedContext();
             var metadata = AccountMetadata.GetEntityMetadata();
             var entityMetadata = new EntityMetadataCollection() { metadata };
-            fakedContext.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
+            _context.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
 
-            var clone = new Entity("account") { ["name"] = "Your Company", ["primarycontactid"] = new EntityReference("contact", Guid.NewGuid()) }.Clone(fakedContext.GetOrganizationService(), true, "primarycontactid");
+            var clone = new Entity("account")
+            {
+                ["name"] = "Your Company",
+                ["primarycontactid"] = new EntityReference("contact", Guid.NewGuid())
+            }.Clone(_service, true, "primarycontactid");
 
             Assert.Null(clone.GetAttributeValue<EntityReference>("primarycontactid"));
         }
@@ -156,15 +157,15 @@ namespace Dataverse.Sdk.Extensions.Tests
         [Fact]
         public void Clone_Correctly_Clones_Record_Without_columnsToRemove()
         {
-            var fakedContext = new XrmFakedContext();
             var metadata = AccountMetadata.GetEntityMetadata();
             var entityMetadata = new EntityMetadataCollection() { metadata };
-            fakedContext.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
+            _context.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
 
-            var clone = new Entity("account") {
+            var clone = new Entity("account")
+            {
                 ["name"] = "Your Company",
                 ["primarycontactid"] = new EntityReference("contact", Guid.NewGuid())
-            }.Clone(fakedContext.GetOrganizationService());
+            }.Clone(_service);
 
             Assert.NotNull(clone.GetAttributeValue<EntityReference>("primarycontactid"));
         }
@@ -172,16 +173,15 @@ namespace Dataverse.Sdk.Extensions.Tests
         [Fact]
         public void Clone_Ignores_Uniqueidentifier_Columns()
         {
-            var fakedContext = new XrmFakedContext();
             var metadata = AccountMetadata.GetEntityMetadata();
             var entityMetadata = new EntityMetadataCollection() { metadata };
-            fakedContext.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
+            _context.AddFakeMessageExecutor<RetrieveMetadataChangesRequest>(new RetrieveMetadataChangesRequestExecutor(entityMetadata));
 
             var clone = new Entity("account")
             {
                 ["name"] = "Your Company",
                 ["processid"] = Guid.NewGuid()
-            }.Clone(fakedContext.GetOrganizationService());
+            }.Clone(_service);
 
             Assert.Null(clone.GetAttributeValue<Guid?>("processid"));
         }
