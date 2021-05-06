@@ -2,6 +2,7 @@
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata.Query;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Dataverse.Sdk.Extensions
@@ -34,6 +35,92 @@ namespace Dataverse.Sdk.Extensions
             }
 
             return (T)aliasedValue.Value;
+        }
+
+        /// <summary>
+        /// Adds a party to the activity entity
+        /// </summary>
+        /// <param name="record">Activity entity</param>
+        /// <param name="columnName">Logical name of the party list column</param>
+        /// <param name="partyReference">Reference to the record to add as a party</param>
+        public static void AddParty(this Entity record, string columnName, EntityReference partyReference)
+        {
+            if (!record.Contains(columnName))
+            {
+                record[columnName] = new EntityCollection();
+            }
+
+            record.GetAttributeValue<EntityCollection>(columnName).Entities.Add(
+                new Entity("activityparty")
+                {
+                    Attributes =
+                    {
+                        {"partyid", partyReference }
+                    }
+                });
+        }
+
+        /// <summary>
+        /// Adds parties to the activity entity
+        /// </summary>
+        /// <param name="record">Activity entity</param>
+        /// <param name="columnName">Logical name of the party list column</param>
+        /// <param name="partiesReferences">Reference to the record to add as a party</param>
+        public static void AddParties(this Entity record, string columnName, params EntityReference[] partiesReferences)
+        {
+            if (!partiesReferences.Any())
+            {
+                throw new ArgumentException("AddParties requires at least one item", nameof(partiesReferences));
+            }
+
+            foreach (var partyReference in partiesReferences)
+            {
+                record.AddParty(columnName, partyReference);
+            }
+        }
+
+        /// <summary>
+        /// Set a party to the activity entity
+        /// </summary>
+        /// <remarks>
+        /// This method replaces existing party list with the specified party
+        /// reference
+        /// </remarks>
+        /// <param name="record">Activity entity</param>
+        /// <param name="columnName">Logical name of the party list column</param>
+        /// <param name="partyReference">Reference to the record to add as a party</param>
+        public static void SetParty(this Entity record, string columnName, EntityReference partyReference)
+        {
+            record[columnName] = new EntityCollection(new List<Entity>{
+                new Entity("activityparty")
+                {
+                     Attributes =
+                    {
+                        {"partyid", partyReference }
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// Adds parties to the activity entity
+        /// </summary>
+        /// <param name="record">Activity entity</param>
+        /// <param name="columnName">Logical name of the party list column</param>
+        /// <param name="partiesReferences">References to the records to add as a party</param>
+        public static void SetParties(this Entity record, string columnName, params EntityReference[] partiesReferences)
+        {
+            if (!partiesReferences.Any())
+            {
+                throw new ArgumentException("SetParties requires at least one item", nameof(partiesReferences));
+            }
+
+            record.SetParty(columnName, partiesReferences.First());
+
+            foreach (var partyReference in partiesReferences.Skip(1))
+            {
+                record.AddParty(columnName, partyReference);
+            }
         }
 
         /// <summary>

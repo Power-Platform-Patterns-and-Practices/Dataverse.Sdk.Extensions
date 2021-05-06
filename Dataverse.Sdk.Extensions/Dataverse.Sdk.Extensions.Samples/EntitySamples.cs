@@ -8,6 +8,31 @@ namespace Dataverse.Sdk.Extensions.Samples
     public class EntitySamples
     {
         /// <summary>
+        /// Sample that demonstrates how to add an activity party to an
+        /// activity table
+        /// </summary>
+        /// <param name="contactReference">Reference to a dataverse contact row</param>
+        /// <param name="accountReference">Reference to a dataverse account row</param>
+        public void AddPartiesToActivityTable(EntityReference contactReference, EntityReference accountReference)
+        {
+            var email = new Entity("email");
+            email["subject"] = "A test email";
+            email.AddParties("to", contactReference, accountReference);
+        }
+
+        /// <summary>
+        /// Sample that demonstrates how to add an activity party to an
+        /// activity table
+        /// </summary>
+        /// <param name="contactReference">Reference to a dataverse row</param>
+        public void AddPartyToActivityTable(EntityReference contactReference)
+        {
+            var email = new Entity("email");
+            email["subject"] = "A test email";
+            email.AddParty("to", contactReference);
+        }
+
+        /// <summary>
         /// Sample that demonstrates how to clone a Dataverse row
         /// </summary>
         /// <remarks>
