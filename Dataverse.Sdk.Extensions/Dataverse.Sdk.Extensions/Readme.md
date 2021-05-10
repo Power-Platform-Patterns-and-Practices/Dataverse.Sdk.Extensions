@@ -1,8 +1,14 @@
 List of extensions class and methods
 
 - [EntityExtensions](https://github.com/Power-Platform-Patterns-and-Practices/Dataverse.Sdk.Extensions/blob/main/Dataverse.Sdk.Extensions/Dataverse.Sdk.Extensions/EntityExtensions.cs) : 
+    - AddParty : Add activity party to an activity table row
+    - AddParties : Add activity parties to an activity table row
+    - ContainsNullValue : Check if specified columns are present in a table row with null value (ie. if they have been emptied)
+    - ContainsValue : Check if specified columns are present in a table row with not null value (ie. if they have been set)
     - GetAliasedValue : Get value of an attribute from a linked entity
     - Clone : Clone a row
+    - SetParty : Set activity party to an activity table row (ie. empty then add activity party)
+    - SetParties : Add activity parties to an activity table row (ie. empty then add activity parties)
 
 - [IOrganizationServiceExtensions](https://github.com/Power-Platform-Patterns-and-Practices/Dataverse.Sdk.Extensions/blob/main/Dataverse.Sdk.Extensions/Dataverse.Sdk.Extensions/IOrganizationServiceExtensions.cs):
     -  CreateFromInitialization : Creates a table row from another table row using standard columns mapping
