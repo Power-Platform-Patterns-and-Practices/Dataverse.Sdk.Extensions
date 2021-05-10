@@ -1,4 +1,5 @@
-﻿using Dataverse.Sdk.Extensions.Tests.FakeMessageExecutors;
+﻿using Dataverse.Sdk.Extensions.Tests.EarlyBoundEntities;
+using Dataverse.Sdk.Extensions.Tests.FakeMessageExecutors;
 using Dataverse.Sdk.Extensions.Tests.MetadataModels;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
@@ -46,6 +47,82 @@ namespace Dataverse.Sdk.Extensions.Tests
             email.AddParties("to", contactReference, contactReference2);
 
             Assert.Equal(2, email.GetAttributeValue<EntityCollection>("to").Entities.Count);
+        }
+
+        [Fact]
+        public void Check_Not_Null_Columns_In_Entity_False_Because_Missing_Column()
+        {
+            var account = new Account
+            {
+                Name = "account1",
+                AccountNumber = "ABCDEFGH",
+                Address1_City = "Paris"
+            };
+
+            bool containsNullValue = account.ContainsValue(e => e.AccountNumber, e => e.Address1_City, e => e.Address1_Line1);
+
+            Assert.False(containsNullValue);
+        }
+
+        [Fact]
+        public void Check_Not_Null_Columns_In_Entity_True()
+        {
+            var account = new Account
+            {
+                Name = "account1",
+                AccountNumber = "ABCDEFGH",
+                Address1_City = "Paris"
+            };
+
+            bool containsNullValue = account.ContainsValue(e => e.AccountNumber, e => e.Address1_City);
+
+            Assert.True(containsNullValue);
+        }
+
+        [Fact]
+        public void Check_Null_Columns_In_Entity_False()
+        {
+            var account = new Account
+            {
+                Name = "account1",
+                AccountNumber = "ABCDEFGH",
+                Address1_City = null,
+                Address1_Line1 = null,
+            };
+
+            bool containsNullValue = account.ContainsNullValue(e => e.AccountNumber, e => e.Address1_City);
+
+            Assert.False(containsNullValue);
+        }
+
+        [Fact]
+        public void Check_Null_Columns_In_Entity_False_Because_Missing_Column()
+        {
+            var account = new Account
+            {
+                Name = "account1",
+                AccountNumber = null,
+                Address1_City = null
+            };
+
+            bool containsNullValue = account.ContainsNullValue(e => e.AccountNumber, e => e.Address1_City, e => e.Address1_Line1);
+
+            Assert.False(containsNullValue);
+        }
+
+        [Fact]
+        public void Check_Null_Columns_In_Entity_True()
+        {
+            var account = new Account
+            {
+                Name = "account1",
+                Address1_City = null,
+                AccountNumber = null,
+            };
+
+            bool containsNullValue = account.ContainsNullValue(e => e.AccountNumber, e => e.Address1_City);
+
+            Assert.True(containsNullValue);
         }
 
         [Fact]

@@ -4,6 +4,8 @@ using Microsoft.Xrm.Sdk.Metadata.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Dataverse.Sdk.Extensions
 {
@@ -198,6 +200,85 @@ namespace Dataverse.Sdk.Extensions
             }
 
             return cloned;
+        }
+
+        /// <summary>
+        /// Indicates if the table row contains columns that have been reseted
+        /// </summary>
+        /// <example>
+        /// bool containsNullValue = account.ContainsNullValue(a => a.Name, a => a.AccountNumber);
+        /// </example>
+        /// <typeparam name="T">Type of the table</typeparam>
+        /// <param name="record">Table row</param>
+        /// <param name="columns">Columns to check for null value</param>
+        /// <returns>True if all columns specified are present in the table row with a null value</returns>
+        public static bool ContainsNullValue<T>(this T record, params Expression<Func<T, object>>[] columns) where T : Entity
+        {
+            return record.ContainsNullValue(columns.Select(c => GetLogicalName(c.Body)).ToArray());
+        }
+
+        /// <summary>
+        /// Indicates if the table row contains columns that have been reseted
+        /// </summary>
+        /// <example>
+        /// bool containsNullValue = account.ContainsNullValue("name", "accountnumber");
+        /// </example>
+        /// <param name="record">Table row</param>
+        /// <param name="columns">Columns to check for null value</param>
+        /// <returns>True if all columns specified are present in the table row with a null value</returns>
+        public static bool ContainsNullValue(this Entity record, params string[] columns)
+        {
+            bool result = true;
+
+            foreach (var column in columns)
+            {
+                result &= record.Contains(column) && record[column] == null;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Indicates if the table row contains columns that have a value not null
+        /// </summary>
+        /// <example>
+        /// bool containsNullValue = account.ContainsValue(a => a.Name, a => a.AccountNumber);
+        /// </example>
+        /// <typeparam name="T">Type of the table</typeparam>
+        /// <param name="record">Table row</param>
+        /// <param name="columns">Columns to check for not null value</param>
+        /// <returns>True if all columns specified are present in the table row with a value different from null</returns>
+        public static bool ContainsValue<T>(this T record, params Expression<Func<T, object>>[] columns) where T : Entity
+        {
+            return record.ContainsValue(columns.Select(c => GetLogicalName(c.Body)).ToArray());
+        }
+
+        /// <summary>
+        /// Indicates if the table row contains columns that have a value not null
+        /// </summary>
+        /// <example>
+        /// bool containsNullValue = account.ContainsValue("name", "accountnumber");
+        /// </example>
+        /// <param name="record">Table row</param>
+        /// <param name="columns">Columns to check for not null value</param>
+        /// <returns>True if all columns specified are present in the table row with a value different from null</returns>
+        public static bool ContainsValue(this Entity record, params string[] columns)
+        {
+            bool result = true;
+
+            foreach (var column in columns)
+            {
+                result &= record.Contains(column) && record[column] != null;
+            }
+
+            return result;
+        }
+
+        private static string GetLogicalName(Expression expr)
+        {
+            MemberExpression me = expr as MemberExpression;
+            var pi = (PropertyInfo)me.Member;
+            return pi.GetCustomAttribute<AttributeLogicalNameAttribute>().LogicalName;
         }
     }
 }
