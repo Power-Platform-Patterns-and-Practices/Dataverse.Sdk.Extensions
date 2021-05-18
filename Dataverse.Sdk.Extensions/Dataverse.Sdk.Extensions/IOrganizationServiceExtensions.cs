@@ -5,6 +5,7 @@ using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Dataverse.Sdk.Extensions
 {
@@ -309,29 +310,108 @@ namespace Dataverse.Sdk.Extensions
             return service.RetrieveMultiple(query).Entities.Select(e => e.ToEntity<T>()).ToList();
         }
 
-
-        /// <summary>Retrieves all.</summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <typeparam name="T">A class derived from Entity</typeparam>
         /// <param name="service">Dataverse Organization service</param>
-        /// <param name="queryExpression">A QueryExpression with query details</param>
-        /// <param name="queryingPageSize">Optional: Size of the querying page (default: 5000 rows per page)</param>
+        /// <param name="query">A QueryBase object (QueryExpression, QueryByAttribute)</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
         /// <returns>All rows meeting the query criteria, typed as the specified class. If there are multiple pages of results, the pages are combined to a single list</returns>
-        public static List<T> RetrieveAll<T>(this IOrganizationService service, QueryExpression queryExpression, int queryingPageSize = 5000) where T : Entity
+        public static IEnumerable<T> RetrieveAll<T>(this IOrganizationService service, QueryBase query, Action<EntityCollection> callback = null) where T : Entity
         {
-            queryExpression.PageInfo = new PagingInfo() { PageNumber = 1, Count = queryingPageSize, PagingCookie = null };
-            List<T> entities = new List<T>();
-
-            EntityCollection ec = service.RetrieveMultiple(queryExpression);
-            entities.AddRange(ec.Entities.Select(e => e.ToEntity<T>()));
-            while (ec.MoreRecords)
+            foreach (var result in RetrieveAll(service, query, callback))
             {
-                queryExpression.PageInfo.PageNumber++;
-                queryExpression.PageInfo.PagingCookie = ec.PagingCookie;
-                ec = service.RetrieveMultiple(queryExpression);
-                entities.AddRange(ec.Entities.Select(e => e.ToEntity<T>()));
+                yield return result.ToEntity<T>();
             }
+        }
 
-            return entities;
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <typeparam name="T">A class derived from Entity</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">A FetchExpression object</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
+        /// <returns>All rows meeting the query criteria, typed as the specified class. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static IEnumerable<T> RetrieveAll<T>(this IOrganizationService service, FetchExpression query, Action<EntityCollection> callback = null) where T : Entity
+        {
+            foreach (var result in RetrieveAll(service, query, callback))
+            {
+                yield return result.ToEntity<T>();
+            }
+        }
+
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">A QueryBase object (QueryExpression, QueryByAttribute)</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
+        /// <returns>All rows meeting the query criteria. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static IEnumerable<Entity> RetrieveAll(this IOrganizationService service, QueryBase query, Action<EntityCollection> callback = null)
+        {
+            EntityCollection collection = new EntityCollection
+            {
+                MoreRecords = true
+            };
+
+            while (collection.MoreRecords)
+            {
+                if (query is QueryExpression)
+                {
+                    var qe = query as QueryExpression;
+                    qe.PageInfo.PageNumber++;
+                    qe.PageInfo.PagingCookie = collection.PagingCookie;
+                }
+                else if (query is QueryByAttribute)
+                {
+                    var qa = query as QueryByAttribute;
+                    if (qa.PageInfo == null)
+                    {
+                        qa.PageInfo = new PagingInfo();
+                    }
+                    qa.PageInfo.PageNumber++;
+                    qa.PageInfo.PagingCookie = collection.PagingCookie;
+                }
+
+                collection = service.RetrieveMultiple(query);
+                callback?.Invoke(collection);
+
+                foreach (Entity entity in collection.Entities)
+                {
+                    yield return entity;
+                }
+            }
+        }
+
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">A FetchExpression object</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
+        /// <returns>All rows meeting the query criteria. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static IEnumerable<Entity> RetrieveAll(this IOrganizationService service, FetchExpression query, Action<EntityCollection> callback = null)
+        {
+            EntityCollection collection = new EntityCollection
+            {
+                MoreRecords = true
+            };
+
+            /// For performance reasons it's better to load XML once
+            XDocument document = XDocument.Parse(query.Query);
+
+            while (collection.MoreRecords)
+            {
+                string page = document.Root.Attribute("page")?.Value;
+                int pageNumber = page != null ? int.Parse(page) : 0;
+
+                document.Root.SetAttributeValue("paging-cookie", collection.PagingCookie);
+                document.Root.SetAttributeValue("page", ++pageNumber);
+
+                query.Query = document.ToString();
+
+                collection = service.RetrieveMultiple(query);
+                callback?.Invoke(collection);
+
+                foreach (Entity entity in collection.Entities)
+                {
+                    yield return entity;
+                }
+            }
         }
     }
 }
