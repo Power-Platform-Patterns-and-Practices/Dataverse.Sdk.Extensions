@@ -1,6 +1,7 @@
 ﻿using Dataverse.Sdk.Extensions.Samples.EarlyBoundEntities;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
 
@@ -139,6 +140,49 @@ namespace Dataverse.Sdk.Extensions.Samples
         public void RetrieveOneEnvironmentVariable(IOrganizationService service, string variableSchemaName)
         {
             string environmentVariableValue = service.GetEnvironmentVariable(variableSchemaName);
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve an account row typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="accountId">The primary key of an account to retrieve</param>
+        public void RetrieveTyped(IOrganizationService service, Guid accountId)
+        {
+            Account row = service.Retrieve<Account>(accountId, new ColumnSet(Account.Fields.Name));
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve multiple accounts with the results typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveMultipleTyped(IOrganizationService service)
+        {
+            QueryExpression qe = new QueryExpression(Account.EntityLogicalName)
+            {
+                TopCount = 10,
+                ColumnSet = new ColumnSet(Account.Fields.Name)
+            };
+
+            List<Account> rows = service.RetrieveMultiple<Account>(qe);
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve all accounts with the results typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveAllTypedEntity(IOrganizationService service)
+        {
+            QueryExpression qe = new QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new ColumnSet(Account.Fields.Name)
+            };
+
+            // Retrieve all rows using the default page size
+            List<Account> rows = service.RetrieveAll<Account>(qe);
+
+            // Retrieve all rows using a smaller page size, which may be necessary when querying very large tables
+            rows = service.RetrieveAll<Account>(qe, 1000);
         }
     }
 }

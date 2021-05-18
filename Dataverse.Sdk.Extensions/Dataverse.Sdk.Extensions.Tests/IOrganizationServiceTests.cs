@@ -536,5 +536,88 @@ namespace Dataverse.Sdk.Extensions.Tests
             Assert.NotEmpty(_context.CreateQuery("account").Where(x => x.Id == account.Id));
             Assert.Equal("Still Your Company", _context.CreateQuery("account").First().GetAttributeValue<string>("name"));
         }
+
+        [Fact]
+        public void RetrieveSingleTyped()
+        {
+            //Arrange
+            var id = Guid.NewGuid();
+            var account = new Account()
+            {
+                Id = id,
+                Name = "Testing Account"
+            };
+
+            _context.Initialize(account);
+
+            //Act
+            Account retrievedAccount = _service.Retrieve<Account>(id, new Microsoft.Xrm.Sdk.Query.ColumnSet(Account.Fields.Name));
+
+            //Assert
+            Assert.Equal(account.Name, retrievedAccount.Name);
+        }
+
+        [Fact]
+        public void RetrieveMultipleTyped()
+        {
+            //Arrange
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < 5; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            Microsoft.Xrm.Sdk.Query.QueryExpression queryExpression = new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(Account.Fields.Name)
+            };
+            queryExpression.Criteria.AddCondition(Account.Fields.Name, Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, distinctAccountName);
+
+            List<Account> retrievedAccounts = _service.RetrieveMultiple<Account>(queryExpression);
+
+            //Assert
+            Assert.Equal(5, retrievedAccounts.Count());
+        }
+
+        [Fact]
+        public void RetrieveAllTyped()
+        {
+            //Arrange
+            int totalRecords = 5010;
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < totalRecords; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            Microsoft.Xrm.Sdk.Query.QueryExpression queryExpression = new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(Account.Fields.Name)
+            };
+            queryExpression.Criteria.AddCondition(Account.Fields.Name, Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, distinctAccountName);
+
+            List<Account> retrievedAccountsDefaultPageSize = _service.RetrieveAll<Account>(queryExpression);
+            List<Account> retrievedAccountsOverriddenPageSize = _service.RetrieveAll<Account>(queryExpression, 2500);
+
+            //Assert
+            Assert.Equal(totalRecords, retrievedAccountsDefaultPageSize.Count());
+            Assert.Equal(totalRecords, retrievedAccountsOverriddenPageSize.Count());
+        }
     }
 }

@@ -282,5 +282,56 @@ namespace Dataverse.Sdk.Extensions
 
             return response.RecordCreated;
         }
+
+        /// <summary>
+        /// Retrieves a table row typed as the specific class. This is particularly useful for Early Bound classes.
+        /// </summary>
+        /// <typeparam name="T">Entity</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="id">Primary key of the row to retrieve</param>
+        /// <param name="columnSet">The columns to retrieve for the row</param>
+        /// <returns>The table row for the record, typed as the specified class</returns>
+        public static T Retrieve<T>(this IOrganizationService service, Guid id, ColumnSet columnSet) where T : Entity
+        {
+            string entityName = typeof(T).GetField("EntityLogicalName").GetRawConstantValue().ToString();
+            return service.Retrieve(entityName, id, columnSet).ToEntity<T>();
+        }
+
+        /// <summary>
+        /// Retrieves a list of records for a query, typed as the specific class. This is particularly useful for Early Bound classes.
+        /// </summary>
+        /// <typeparam name="T">Entity</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">Primary key of the row to retrieve</param>
+        /// <returns>A List of table row for the record, typed as the specified class</returns>
+        public static List<T> RetrieveMultiple<T>(this IOrganizationService service, QueryBase query) where T : Entity
+        {
+            return service.RetrieveMultiple(query).Entities.Select(e => e.ToEntity<T>()).ToList();
+        }
+
+
+        /// <summary>Retrieves all.</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="queryExpression">A QueryExpression with query details</param>
+        /// <param name="queryingPageSize">Optional: Size of the querying page (default: 5000 rows per page)</param>
+        /// <returns>All rows meeting the query criteria, typed as the specified class. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static List<T> RetrieveAll<T>(this IOrganizationService service, QueryExpression queryExpression, int queryingPageSize = 5000) where T : Entity
+        {
+            queryExpression.PageInfo = new PagingInfo() { PageNumber = 1, Count = queryingPageSize, PagingCookie = null };
+            List<T> entities = new List<T>();
+
+            EntityCollection ec = service.RetrieveMultiple(queryExpression);
+            entities.AddRange(ec.Entities.Select(e => e.ToEntity<T>()));
+            while (ec.MoreRecords)
+            {
+                queryExpression.PageInfo.PageNumber++;
+                queryExpression.PageInfo.PagingCookie = ec.PagingCookie;
+                ec = service.RetrieveMultiple(queryExpression);
+                entities.AddRange(ec.Entities.Select(e => e.ToEntity<T>()));
+            }
+
+            return entities;
+        }
     }
 }
