@@ -1,7 +1,9 @@
 ﻿using Dataverse.Sdk.Extensions.Samples.EarlyBoundEntities;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Dataverse.Sdk.Extensions.Samples
@@ -139,6 +141,125 @@ namespace Dataverse.Sdk.Extensions.Samples
         public void RetrieveOneEnvironmentVariable(IOrganizationService service, string variableSchemaName)
         {
             string environmentVariableValue = service.GetEnvironmentVariable(variableSchemaName);
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve an account row typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="accountId">The primary key of an account to retrieve</param>
+        public void RetrieveTyped(IOrganizationService service, Guid accountId)
+        {
+            Account row = service.Retrieve<Account>(accountId, new ColumnSet(Account.Fields.Name));
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve multiple accounts with the results typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveMultipleTyped(IOrganizationService service)
+        {
+            QueryExpression qe = new QueryExpression(Account.EntityLogicalName)
+            {
+                TopCount = 10,
+                ColumnSet = new ColumnSet(Account.Fields.Name)
+            };
+
+            List<Account> rows = service.RetrieveMultiple<Account>(qe);
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve all accounts using a Query Expression
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveAll_QueryExpression(IOrganizationService service)
+        {
+            QueryExpression queryExpression = new QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new ColumnSet(Account.Fields.Name)
+            };
+
+            IEnumerable<Entity> enumerableResults = service.RetrieveAll(queryExpression);
+            var genericResultsAsList = enumerableResults.ToList();
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve all accounts using a Query Expression, with the results typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveAllTyped_QueryExpression(IOrganizationService service)
+        {
+            QueryExpression queryExpression = new QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new ColumnSet(Account.Fields.Name)
+            };
+
+            IEnumerable<Account> enumerableResults = service.RetrieveAll<Account>(queryExpression);
+            var resultsAsList = enumerableResults.ToList();
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve all accounts using a Query By Attribute
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveAll_QueryByAttribute(IOrganizationService service)
+        {
+            QueryByAttribute queryByAttribute = new QueryByAttribute(Account.EntityLogicalName);
+            queryByAttribute.AddAttributeValue(Account.Fields.Name, "Account Name");
+            queryByAttribute.ColumnSet = new ColumnSet(Account.Fields.Name);
+
+            IEnumerable<Entity> enumerableResults = service.RetrieveAll<Entity>(queryByAttribute);
+            var resultsAsList = enumerableResults.ToList();
+        }
+        
+        /// <summary>
+        /// This sample demonstrates how to retrieve all accounts using a Query By Attribute, with the results typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveAllTyped_QueryByAttribute(IOrganizationService service)
+        {
+            QueryByAttribute queryByAttribute = new QueryByAttribute(Account.EntityLogicalName);
+            queryByAttribute.AddAttributeValue(Account.Fields.Name, "Account Name");
+            queryByAttribute.ColumnSet = new ColumnSet(Account.Fields.Name);
+
+            IEnumerable<Account> enumerableResults = service.RetrieveAll<Account>(queryByAttribute);
+            var resultsAsList = enumerableResults.ToList();
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve all accounts using a Fetch Expression
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveAll_FetchExpression(IOrganizationService service)
+        {
+            var fetchXml = $@"
+                <fetch>
+                  <entity name='account'>
+                    <attribute name='name' />
+                  </entity>
+                </fetch>";
+            FetchExpression fe = new FetchExpression(fetchXml);
+
+            IEnumerable<Entity> enumerableResults = service.RetrieveAll(fe);
+            var resultsAsList = enumerableResults.ToList();
+        }
+
+        /// <summary>
+        /// This sample demonstrates how to retrieve all accounts using a Fetch Expression, with the results typed as an Account object
+        /// </summary>
+        /// <param name="service">Dataverse Organization service</param>
+        public void RetrieveAllTyped_FetchExpression(IOrganizationService service)
+        {
+            var fetchXml = $@"
+                <fetch>
+                  <entity name='account'>
+                    <attribute name='name' />
+                  </entity>
+                </fetch>";
+            FetchExpression fetchExpression = new FetchExpression(fetchXml);
+
+            IEnumerable<Account> enumerableResults = service.RetrieveAll<Account>(fetchExpression);
+            var resultsAsList = enumerableResults.ToList();
         }
     }
 }

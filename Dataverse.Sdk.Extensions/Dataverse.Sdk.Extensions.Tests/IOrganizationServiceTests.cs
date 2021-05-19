@@ -5,6 +5,7 @@ using FakeXrmEasy.Extensions;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -535,6 +536,242 @@ namespace Dataverse.Sdk.Extensions.Tests
             Assert.False(created);
             Assert.NotEmpty(_context.CreateQuery("account").Where(x => x.Id == account.Id));
             Assert.Equal("Still Your Company", _context.CreateQuery("account").First().GetAttributeValue<string>("name"));
+        }
+
+        [Fact]
+        public void RetrieveSingleTyped()
+        {
+            //Arrange
+            var id = Guid.NewGuid();
+            var account = new Account()
+            {
+                Id = id,
+                Name = "Testing Account"
+            };
+
+            _context.Initialize(account);
+
+            //Act
+            Account retrievedAccount = _service.Retrieve<Account>(id, new Microsoft.Xrm.Sdk.Query.ColumnSet(Account.Fields.Name));
+
+            //Assert
+            Assert.Equal(account.Name, retrievedAccount.Name);
+        }
+
+        [Fact]
+        public void RetrieveMultipleTyped()
+        {
+            //Arrange
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < 5; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            Microsoft.Xrm.Sdk.Query.QueryExpression queryExpression = new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(Account.Fields.Name)
+            };
+            queryExpression.Criteria.AddCondition(Account.Fields.Name, Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, distinctAccountName);
+
+            List<Account> retrievedAccounts = _service.RetrieveMultiple<Account>(queryExpression);
+
+            //Assert
+            Assert.Equal(5, retrievedAccounts.Count());
+        }
+
+        [Fact]
+        public void RetrieveAll_QueryExpression()
+        {
+            //Arrange
+            int totalRecords = 5010;
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < totalRecords; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            Microsoft.Xrm.Sdk.Query.QueryExpression queryExpression = new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(Account.Fields.Name)
+            };
+            queryExpression.Criteria.AddCondition(Account.Fields.Name, Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, distinctAccountName);
+
+            IEnumerable<Entity> results = _service.RetrieveAll(queryExpression);
+
+            //Assert
+            Assert.Equal(totalRecords, results.Count());
+        }
+
+        [Fact]
+        public void RetrieveAll_QueryExpression_Typed()
+        {
+            //Arrange
+            int totalRecords = 5010;
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < totalRecords; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            Microsoft.Xrm.Sdk.Query.QueryExpression queryExpression = new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName)
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(Account.Fields.Name)
+            };
+            queryExpression.Criteria.AddCondition(Account.Fields.Name, Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, distinctAccountName);
+
+            IEnumerable<Account> results = _service.RetrieveAll<Account>(queryExpression);
+
+            //Assert
+            Assert.Equal(totalRecords, results.Count());
+        }
+
+        [Fact]
+        public void RetrieveAll_QueryByAttribute()
+        {
+            //Arrange
+            int totalRecords = 5010;
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < totalRecords; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            QueryByAttribute queryByAttribute = new QueryByAttribute(Account.EntityLogicalName);
+            queryByAttribute.AddAttributeValue(Account.Fields.Name, distinctAccountName);
+            queryByAttribute.ColumnSet = new ColumnSet(Account.Fields.Name);
+
+            IEnumerable<Entity> results = _service.RetrieveAll(queryByAttribute);
+
+            //Assert
+            Assert.Equal(totalRecords, results.Count());
+        }
+
+        [Fact]
+        public void RetrieveAll_QueryByAttribute_Typed()
+        {
+            //Arrange
+            int totalRecords = 5010;
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < totalRecords; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            QueryByAttribute queryByAttribute = new QueryByAttribute(Account.EntityLogicalName);
+            queryByAttribute.AddAttributeValue(Account.Fields.Name, distinctAccountName);
+            queryByAttribute.ColumnSet = new ColumnSet(Account.Fields.Name);
+
+            IEnumerable<Account> results = _service.RetrieveAll<Account>(queryByAttribute);
+
+            //Assert
+            Assert.Equal(totalRecords, results.Count());
+        }
+
+        [Fact]
+        public void RetrieveAll_FetchExpression()
+        {
+            //Arrange
+            int totalRecords = 5010;
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < totalRecords; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            var fetchXml = $@"
+                <fetch>
+                  <entity name='account'>
+                    <attribute name='name' />
+                  </entity>
+                </fetch>";
+            FetchExpression fe = new FetchExpression(fetchXml);
+
+            IEnumerable<Entity> results = _service.RetrieveAll(fe);
+
+            //Assert
+            Assert.Equal(totalRecords, results.Count());
+        }
+
+        [Fact]
+        public void RetrieveAll_FetchExpression_Typed()
+        {
+            //Arrange
+            int totalRecords = 5010;
+            string distinctAccountName = Guid.NewGuid().ToString();
+
+            List<Entity> accounts = new List<Entity>();
+            for (int i = 0; i < totalRecords; i++)
+            {
+                accounts.Add(new Account()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = distinctAccountName
+                });
+            }
+            _context.Initialize(accounts);
+
+            //Act
+            var fetchXml = $@"
+                <fetch>
+                  <entity name='account'>
+                    <attribute name='name' />
+                  </entity>
+                </fetch>";
+            FetchExpression fe = new FetchExpression(fetchXml);
+
+            IEnumerable<Account> results = _service.RetrieveAll<Account>(fe);
+
+            //Assert
+            Assert.Equal(totalRecords, results.Count());
         }
     }
 }

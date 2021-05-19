@@ -5,6 +5,7 @@ using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Dataverse.Sdk.Extensions
 {
@@ -281,6 +282,136 @@ namespace Dataverse.Sdk.Extensions
             }
 
             return response.RecordCreated;
+        }
+
+        /// <summary>
+        /// Retrieves a table row typed as the specific class. This is particularly useful for Early Bound classes.
+        /// </summary>
+        /// <typeparam name="T">Entity</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="id">Primary key of the row to retrieve</param>
+        /// <param name="columnSet">The columns to retrieve for the row</param>
+        /// <returns>The table row for the record, typed as the specified class</returns>
+        public static T Retrieve<T>(this IOrganizationService service, Guid id, ColumnSet columnSet) where T : Entity
+        {
+            string entityName = typeof(T).GetField("EntityLogicalName").GetRawConstantValue().ToString();
+            return service.Retrieve(entityName, id, columnSet).ToEntity<T>();
+        }
+
+        /// <summary>
+        /// Retrieves a list of records for a query, typed as the specific class. This is particularly useful for Early Bound classes.
+        /// </summary>
+        /// <typeparam name="T">Entity</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">Primary key of the row to retrieve</param>
+        /// <returns>A List of table row for the record, typed as the specified class</returns>
+        public static List<T> RetrieveMultiple<T>(this IOrganizationService service, QueryBase query) where T : Entity
+        {
+            return service.RetrieveMultiple(query).Entities.Select(e => e.ToEntity<T>()).ToList();
+        }
+
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <typeparam name="T">A class derived from Entity</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">A QueryBase object (QueryExpression, QueryByAttribute)</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
+        /// <returns>All rows meeting the query criteria, typed as the specified class. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static IEnumerable<T> RetrieveAll<T>(this IOrganizationService service, QueryBase query, Action<EntityCollection> callback = null) where T : Entity
+        {
+            foreach (var result in RetrieveAll(service, query, callback))
+            {
+                yield return result.ToEntity<T>();
+            }
+        }
+
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <typeparam name="T">A class derived from Entity</typeparam>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">A FetchExpression object</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
+        /// <returns>All rows meeting the query criteria, typed as the specified class. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static IEnumerable<T> RetrieveAll<T>(this IOrganizationService service, FetchExpression query, Action<EntityCollection> callback = null) where T : Entity
+        {
+            foreach (var result in RetrieveAll(service, query, callback))
+            {
+                yield return result.ToEntity<T>();
+            }
+        }
+
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">A QueryBase object (QueryExpression, QueryByAttribute)</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
+        /// <returns>All rows meeting the query criteria. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static IEnumerable<Entity> RetrieveAll(this IOrganizationService service, QueryBase query, Action<EntityCollection> callback = null)
+        {
+            EntityCollection collection = new EntityCollection
+            {
+                MoreRecords = true
+            };
+
+            while (collection.MoreRecords)
+            {
+                if (query is QueryExpression)
+                {
+                    var qe = query as QueryExpression;
+                    qe.PageInfo.PageNumber++;
+                    qe.PageInfo.PagingCookie = collection.PagingCookie;
+                }
+                else if (query is QueryByAttribute)
+                {
+                    var qa = query as QueryByAttribute;
+                    if (qa.PageInfo == null)
+                    {
+                        qa.PageInfo = new PagingInfo();
+                    }
+                    qa.PageInfo.PageNumber++;
+                    qa.PageInfo.PagingCookie = collection.PagingCookie;
+                }
+
+                collection = service.RetrieveMultiple(query);
+                callback?.Invoke(collection);
+
+                foreach (Entity entity in collection.Entities)
+                {
+                    yield return entity;
+                }
+            }
+        }
+
+        /// <summary>Retrieves all rows for the query</summary>
+        /// <param name="service">Dataverse Organization service</param>
+        /// <param name="query">A FetchExpression object</param>
+        /// <param name="callback">Optional: A callback method to invoke with each page of results</param>
+        /// <returns>All rows meeting the query criteria. If there are multiple pages of results, the pages are combined to a single list</returns>
+        public static IEnumerable<Entity> RetrieveAll(this IOrganizationService service, FetchExpression query, Action<EntityCollection> callback = null)
+        {
+            EntityCollection collection = new EntityCollection
+            {
+                MoreRecords = true
+            };
+
+            /// For performance reasons it's better to load XML once
+            XDocument document = XDocument.Parse(query.Query);
+
+            while (collection.MoreRecords)
+            {
+                string page = document.Root.Attribute("page")?.Value;
+                int pageNumber = page != null ? int.Parse(page) : 0;
+
+                document.Root.SetAttributeValue("paging-cookie", collection.PagingCookie);
+                document.Root.SetAttributeValue("page", ++pageNumber);
+
+                query.Query = document.ToString();
+
+                collection = service.RetrieveMultiple(query);
+                callback?.Invoke(collection);
+
+                foreach (Entity entity in collection.Entities)
+                {
+                    yield return entity;
+                }
+            }
         }
     }
 }
